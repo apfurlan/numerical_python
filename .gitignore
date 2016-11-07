@@ -1,0 +1,54 @@
+from numpy import *
+from scipy.optimize import curve_fit, leastsq
+from matplotlib import *
+from pylab import *
+
+rc('text', usetex=True)
+rc('font', **{'family': 'serif','serif':['Computer Modern']})
+rc('xtick', labelsize=22)
+rc('ytick', labelsize=22)
+
+subplots_adjust(bottom=0.135,left=0.13,right=0.965,top=0.935,
+                wspace=0.32,hspace=0.)
+
+#=========================== START CODE ====================#
+filename='Energiaconf1.dat'
+data=loadtxt(filename)
+x=data[:,0]  #distance
+Ek=data[:,1] #Energy from quantum mechanics calculation
+plot(x,Ek,'bo')
+
+natoms=36
+eps=1. ; sigma=1.
+
+def LJ(x,eps,sigma) :
+
+    i=0
+
+    filename2='dados.dat'
+    data=loadtxt(filename2)
+    rij=[]
+    bb=data[:,2]
+    rij=zeros((len(bb)))
+    rij[:]=bb[:]
+
+    
+
+    sumrij6=0.; sumrij12=0.; k=0
+    for k in arange(i*natoms+1,(i+1)*natoms) :
+        sumrij6 = sumrij6 +rij[k]**(-6)
+        sumrij12= sumrij12+rij[k]**(-12)
+
+    if i == 0 :
+        for k in arange(i*natoms,(i+1)*natoms) :
+            sumrij6 = sumrij6 +rij[k]**(-6)
+            sumrij12= sumrij12+rij[k]**(-12)
+
+    return 4*eps*(sigma**12*(sumrij12)-sigma**6*(sumrij6))
+
+
+
+initial_guess=[1.,1.]
+popt,pcov = curve_fit(LJ, x,Ek)
+
+print popt
